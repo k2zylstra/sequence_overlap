@@ -9,9 +9,41 @@ import sys
 def sort(S, h, Ssize):
     # create bitvector of ones. Doesnt matter that I am doubling the memory.
     #   will fix this in the C implementation if I try and do it that way
-    cp_bitvec = bitarray(Ssize)
+    delim_size = 9
+    cp_bitvec = bitarray(Ssize - 9)
+    cp_bitvec.setall(False)
+    cp_bitvec.append('111111111') # this is the delimiter portion of the array
+
+    shift_amount = 0
+    tmp = 0
+
+    val1 = bitarray(22)
+    val1.setall(False)
+    val2 = bitarray(22)
+    val2.setall(False)
+
+    is_val1 = True
+
+    # need to change this so that I am always looking at the second value except for the first time
     for i in range(Ssize):
-        
+        x = S & cp_bitvec
+        if x == cp_bitvec:
+            # delimiter start or end
+            shift_amount += 0
+            cp_bitvec << delim_size
+            if is_val1:
+                is_val1 = False
+                #check if val1 is less than key value and if val2 is greater than key value
+            else:
+                is_val1 = True
+        if val1:
+            val1 |= (bitarray(False) * 21).append(True) << shift_amount
+        else:
+            val2 |= (bitarray(False) * 21).append(True) << shift_amount
+                
+        cp_bitvec << 1
+        shift_amount += 1
+
 
 def linsearch(B, a):
     pass
