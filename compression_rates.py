@@ -9,6 +9,7 @@ import numpy
 import random
 import check_prob_bitstring
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # will contain repeats
 def create_rnd_rows(num_rows, file_len):
@@ -216,17 +217,26 @@ def main():
             if i == len(set_size) - 1:
                 break
             f.write(",")
+        f.write("\n")
         for i in set_size:
             for j in range(len(S[i])):
                 f.write(str(S[i][j]))
                 if i == len(set_size) - 1:
                     break
                 f.write(",")
+            f.write("\n")
 
     plt.bar(x=S[100], height=5, width=0.8)
     plt.show()
     
-
+def create_graph(file_path):
+    sns.set_style("dark")
+    df = pd.read_csv(file_path)
+    df = df.set_index('set_size')
+    df.plot.bar()
+    plt.show()
+    return
 
 if __name__ == "__main__":
-    main()
+    #main()
+    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
