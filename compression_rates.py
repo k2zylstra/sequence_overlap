@@ -9,7 +9,9 @@ import numpy
 import random
 import check_prob_bitstring
 import matplotlib.pyplot as plt
+import os
 import seaborn as sns
+import datetime
 
 # will contain repeats
 def create_rnd_rows(num_rows, file_len):
@@ -25,17 +27,24 @@ def get_data_ucsc_gtf(num_rows, file_name):
     #create empty data frame with gtf format
     df = pd.DataFrame(columns=['sequence', 'source', 'feature', 'start', 'end'])
     #get file length
-    num_lines = sum(1 for line in open(file_name, 'r'))
+    #num_lines = sum(1 for line in open(file_name, 'r'))
+    num_lines = 0
+    with open(file_name, 'r') as f:
+        for i, line in enumerate(f):
+            num_lines += 1
 
     rows = create_rnd_rows(num_rows, num_lines)
+    num_rows = len(rows)
     #read in specified rows
     with open(file_name, 'r') as f:
         df_count = 0
         for i, line in enumerate(f):
-            if i in rows:
-
+            if i == rows[0]:
+                rows.pop(0)
                 df.loc[df_count] = line.split()[:5]
                 df_count += 1
+                if not rows:
+                    break
     df = df.drop(columns=['sequence', 'source', 'feature'])
     df = df.astype(int)
     arr = df.to_numpy()
@@ -191,52 +200,76 @@ def test_comp_delim2_smlhdr(A, delim_size):
     size += 2 * prob_nat_delim * len(A) * largest_bit_size
     return size
 
-
-def main():
-
-    # for sequence set sizes of variable, 'set_size'
-    set_size = [100, 1000, 10000]
-
-    # holds data for all found sizes
-    S = {}
-    
-    for s in set_size:
-        size = []
-        A = get_data_ucsc_gtf(s, "/home/kieran/Documents/Bachelor_Thesis/Implementation/hg38.ensGene.gtf")
-        size.append(test_comp_normal(A))
-        size.append(test_comp_second(A))
-        size.append(test_comp_delim(A, 9))
-        size.append(test_comp_delim2(A, 9))
-        size.append(test_comp_delim2_smlhdr(A, 9))
-
-        S[s] = size
-    
-    with open("compression_rates_results.csv", "w") as f:
-        for i in range(len(set_size)):
-            f.write(str(set_size[i]))
-            if i == len(set_size) - 1:
-                break
-            f.write(",")
-        f.write("\n")
-        for i in set_size:
-            for j in range(len(S[i])):
-                f.write(str(S[i][j]))
-                if i == len(set_size) - 1:
+def create_new_csv(path, num_trials):
+    if os.path.exists(path):
+        with open("compression_rates_results.csv", "w") as f:
+            f.write("set_size|")
+            for i in range(num_trials):
+                f.write("Trial"+str(i))
+                if i == num_trials-2:
                     break
-                f.write(",")
-            f.write("\n")
+                f.write("|")
 
-    plt.bar(x=S[100], height=5, width=0.8)
-    plt.show()
-    
+# Data is a dictionary with set sizes as keys and a 2d array of compression type as rows
+#   and the amount of space as the columns
+def write_csv(path, resultsfile, data, set_sizel):
+
+    if os.path.exists(path):
+        create_new_csv(path)
+    with open("compression_rates_results.csv", "a") as f:
+        for i in set_sizel:
+            f.write(str(i)+"|")
+            for j in range(len(data[i])):
+                f.write(str(data[i][j]))
+                if i == len(set_sizel) - 2:
+                    break
+                f.write("|")
+            f.write("\n")
+     
 def create_graph(file_path):
     sns.set_style("dark")
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, delimiter="|")
     df = df.set_index('set_size')
     df.plot.bar()
     plt.show()
     return
 
+   
+
+def main():
+    PATH = "/home/kieran/Documents/Bachelor_Thesis/Implementation/"
+    GENE_FILE = "hg38.ensGene.gtf"
+    RESULTS_FILE = "compression_rates_results.csv"
+    num_trials = 1
+
+    now = datetime.datetime.now()
+    print(str(now))
+
+    # for sequence set sizes of variable, 'set_size'
+    set_sizel = [100, 1000, 10000]
+
+    # holds data for all found sizes
+    S = {}
+    
+    for s in set_sizel:
+        size = []
+        for i in range(num_trials):
+            A = get_data_ucsc_gtf(s, PATH+GENE_FILE)
+
+            trial = []
+            trial.append(test_comp_normal(A))
+            trial.append(test_comp_second(A))
+            trial.append(test_comp_delim(A, 9))
+            trial.append(test_comp_delim2(A, 9))
+            trial.append(test_comp_delim2_smlhdr(A, 9))
+
+            size.append(trial)
+        S[s] = size
+
+    write_csv(PATH, RESULTS_FILE, S, set_sizel)
+    now = datetime.datetime.now()
+    print(str(now))
+    create_graph(PATH+RESULTS_FILE)
+ 
 if __name__ == "__main__":
-    #main()
-    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
+    main()
