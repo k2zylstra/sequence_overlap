@@ -16,8 +16,13 @@ import datetime
 # will contain repeats
 def create_rnd_rows(num_rows, file_len):
     rndlist = []
-    for i in range(num_rows):
-        rndlist.append(random.random() * file_len // 1)
+    i = 0
+    while i < num_rows:
+        rnd = random.random() * file_len // 1
+        if rnd in rndlist:
+            continue
+        rndlist.append(rnd)
+        i+=1
     
     rndlist.sort()
     return rndlist
@@ -205,23 +210,49 @@ def create_new_csv(path, num_trials):
         with open("compression_rates_results.csv", "w") as f:
             f.write("set_size|")
             for i in range(num_trials):
-                f.write("Trial"+str(i))
-                if i == num_trials-2:
+                f.write("Trial"+str(i+1))
+                if i == num_trials-1:
                     break
                 f.write("|")
+            f.write("\n")
+
+# this takes in the dictionary filled with set size as the key and
+#   the array filled with the results of each method as the value. From
+#   this it transforms the data to a stacked verion of this with added columns
+#   of trial number and method number and returns a data frame
+def transform_data(data):
+    new_df = pd.DataFrame(columns=["set_size", "trial_num", "method_num", "space"])
+    row = []
+
+    # for each dictionary key in data
+    for dk in data:
+        for i in range(len(data[dk])):
+            for j in range(len(data[dk][i])):
+                row.append(dk)
+                row.append(i)
+                row.append(j)
+                row.append(data[dk][i][j])
+                s_row = pd.Series(row, index=new_df.columns)
+            
+                new_df = new_df.append(s_row,ignore_index=True)
+                row = []
+    
+    return new_df
+
+
 
 # Data is a dictionary with set sizes as keys and a 2d array of compression type as rows
 #   and the amount of space as the columns
-def write_csv(path, resultsfile, data, set_sizel):
+def write_csv_old(path, resultsfile, data, set_sizel, num_trials):
 
-    if os.path.exists(path):
-        create_new_csv(path)
+    if not os.path.exists(path+resultsfile):
+        create_new_csv(path, num_trials)
     with open("compression_rates_results.csv", "a") as f:
         for i in set_sizel:
             f.write(str(i)+"|")
             for j in range(len(data[i])):
                 f.write(str(data[i][j]))
-                if i == len(set_sizel) - 2:
+                if j == len(data[i]) - 1:
                     break
                 f.write("|")
             f.write("\n")
@@ -234,13 +265,13 @@ def create_graph(file_path):
     plt.show()
     return
 
-   
+#======================================================================== 
 
 def main():
     PATH = "/home/kieran/Documents/Bachelor_Thesis/Implementation/"
     GENE_FILE = "hg38.ensGene.gtf"
     RESULTS_FILE = "compression_rates_results.csv"
-    num_trials = 1
+    num_trials = 100 
 
     now = datetime.datetime.now()
     print(str(now))
@@ -262,14 +293,23 @@ def main():
             trial.append(test_comp_delim(A, 9))
             trial.append(test_comp_delim2(A, 9))
             trial.append(test_comp_delim2_smlhdr(A, 9))
+            
+            #now = datetime.datetime.now()
+            #print("completed trial:", str(i),"| timestamp:", str(now))
 
             size.append(trial)
         S[s] = size
+        now = datetime.datetime.now()
+        print("completed trials for set size:", str(s), "| timestamp:", str(now))
 
-    write_csv(PATH, RESULTS_FILE, S, set_sizel)
+    df = transform_data(S)
+    print(df.head())
+    df.to_csv(PATH+RESULTS_FILE)
+    #write_csv_old(PATH, RESULTS_FILE, S, set_sizel, num_trials)
     now = datetime.datetime.now()
     print(str(now))
-    create_graph(PATH+RESULTS_FILE)
+    #create_graph(PATH+RESULTS_FILE)
  
 if __name__ == "__main__":
-    main()
+    #main()
+    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
