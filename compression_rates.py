@@ -10,7 +10,6 @@ import random
 import check_prob_bitstring
 import matplotlib.pyplot as plt
 import os
-import seaborn as sns
 import datetime
 
 # will contain repeats
@@ -258,10 +257,41 @@ def write_csv_old(path, resultsfile, data, set_sizel, num_trials):
             f.write("\n")
      
 def create_graph(file_path):
-    sns.set_style("dark")
-    df = pd.read_csv(file_path, delimiter="|")
-    df = df.set_index('set_size')
-    df.plot.bar()
+    df = pd.read_csv(file_path, index_col=0)
+
+    # methods to compare
+    M = [0, 1, 2, 3, 4]
+    m1 = 2
+    m2 = 4
+
+    df0 = df[df["method_num"] == m1]
+    df1 = df0[df0["set_size"] == 100]
+    df2 = df0[df0["set_size"] == 1000]
+    df3 = df0[df0["set_size"] == 10000]
+
+    df1["space"] = (df1["space"])/100
+    df2["space"] = (df2["space"])/1000
+    df3["space"] = (df3["space"])/10000
+
+    df_clean = df1.append(df2, ignore_index=True)
+    df_clean = df_clean.append(df3, ignore_index=True)
+    #df[df["set_size"] == 100]["space"].plot.hist(bins=20, alpha=1, color="blue")
+
+    df = df[df["method_num"] == m2]
+    df1 = df[df["set_size"] == 100]
+    df2 = df[df["set_size"] == 1000]
+    df3 = df[df["set_size"] == 10000]
+
+    df1["space"] = (df1["space"])/100
+    df2["space"] = (df2["space"])/1000
+    df3["space"] = (df3["space"])/10000
+
+    df_clean = df_clean.append(df1, ignore_index=True)
+    df_clean = df_clean.append(df2, ignore_index=True)
+    df_clean = df_clean.append(df3, ignore_index=True)
+    df_clean[df_clean["method_num"] == 2]["space"].plot.hist(bins=20,alpha=.5,color="blue")
+    df_clean[df_clean["method_num"] == m2]["space"].plot.hist(bins=20,alpha=.5,color="coral")
+    #
     plt.show()
     return
 
@@ -271,7 +301,7 @@ def main():
     PATH = "/home/kieran/Documents/Bachelor_Thesis/Implementation/"
     GENE_FILE = "hg38.ensGene.gtf"
     RESULTS_FILE = "compression_rates_results.csv"
-    num_trials = 100 
+    num_trials = 1000 
 
     now = datetime.datetime.now()
     print(str(now))
@@ -312,4 +342,4 @@ def main():
  
 if __name__ == "__main__":
     #main()
-    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
+    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results100.csv")
