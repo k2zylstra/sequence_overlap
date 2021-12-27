@@ -9,6 +9,7 @@ import numpy
 import random
 import check_prob_bitstring
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import os
 import datetime
 
@@ -260,8 +261,8 @@ def create_graph(file_path):
     df = pd.read_csv(file_path, index_col=0)
 
     # methods to compare
-    M = [1]
-    colors = ["blue", "coral", "green", "purple", "red"]
+    M = [0, 1, 2, 3, 4, 5]
+    colors = ["blue", "coral", "green", "purple", "red", "yellow"]
     df_clean = pd.DataFrame()
 
     for m in zip(M,colors):
@@ -270,7 +271,11 @@ def create_graph(file_path):
             df_set = df0[df0["set_size"] == s]
             df_set["space"] = df_set["space"]/s
             df_clean = df_clean.append(df_set, ignore_index=True)
-        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(bins=20,alpha=.5,color=m[1])
+        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(bins=20,alpha=.7,color=m[1])
+    
+    handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
+    labels= M
+    plt.legend(handles, labels)
 
     plt.show()
     return
@@ -324,5 +329,5 @@ def main():
     #create_graph(PATH+RESULTS_FILE)
  
 if __name__ == "__main__":
-    main()
-    #create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
+    #main()
+    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
