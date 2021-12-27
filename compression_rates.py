@@ -278,7 +278,7 @@ def create_graph(file_path):
 #======================================================================== 
 
 def main():
-    PATH = "/home/kieran/Documents/Bachelor_Thesis/Implementation/"
+    PATH = "/home/kieran/Documents/Bachelor_Thesis/"
     GENE_FILE = "hg38.ensGene.gtf"
     RESULTS_FILE = "compression_rates_results.csv"
     num_trials = 1000 
