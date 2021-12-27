@@ -260,38 +260,18 @@ def create_graph(file_path):
     df = pd.read_csv(file_path, index_col=0)
 
     # methods to compare
-    M = [0, 1, 2, 3, 4]
-    m1 = 2
-    m2 = 4
+    M = [1]
+    colors = ["blue", "coral", "green", "purple", "red"]
+    df_clean = pd.DataFrame()
 
-    df0 = df[df["method_num"] == m1]
-    df1 = df0[df0["set_size"] == 100]
-    df2 = df0[df0["set_size"] == 1000]
-    df3 = df0[df0["set_size"] == 10000]
+    for m in zip(M,colors):
+        df0 = df[df["method_num"] == m[0]]
+        for s in df["set_size"].unique():
+            df_set = df0[df0["set_size"] == s]
+            df_set["space"] = df_set["space"]/s
+            df_clean = df_clean.append(df_set, ignore_index=True)
+        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(bins=20,alpha=.5,color=m[1])
 
-    df1["space"] = (df1["space"])/100
-    df2["space"] = (df2["space"])/1000
-    df3["space"] = (df3["space"])/10000
-
-    df_clean = df1.append(df2, ignore_index=True)
-    df_clean = df_clean.append(df3, ignore_index=True)
-    #df[df["set_size"] == 100]["space"].plot.hist(bins=20, alpha=1, color="blue")
-
-    df = df[df["method_num"] == m2]
-    df1 = df[df["set_size"] == 100]
-    df2 = df[df["set_size"] == 1000]
-    df3 = df[df["set_size"] == 10000]
-
-    df1["space"] = (df1["space"])/100
-    df2["space"] = (df2["space"])/1000
-    df3["space"] = (df3["space"])/10000
-
-    df_clean = df_clean.append(df1, ignore_index=True)
-    df_clean = df_clean.append(df2, ignore_index=True)
-    df_clean = df_clean.append(df3, ignore_index=True)
-    df_clean[df_clean["method_num"] == 2]["space"].plot.hist(bins=20,alpha=.5,color="blue")
-    df_clean[df_clean["method_num"] == m2]["space"].plot.hist(bins=20,alpha=.5,color="coral")
-    #
     plt.show()
     return
 
@@ -319,6 +299,7 @@ def main():
 
             trial = []
             trial.append(test_comp_normal(A))
+            trial.append(test_comp_first(A))
             trial.append(test_comp_second(A))
             trial.append(test_comp_delim(A, 9))
             trial.append(test_comp_delim2(A, 9))
@@ -326,6 +307,8 @@ def main():
             
             #now = datetime.datetime.now()
             #print("completed trial:", str(i),"| timestamp:", str(now))
+            if i % 100 == 0:
+                print("Completed trial", str(i), "for set size", str(s))
 
             size.append(trial)
         S[s] = size
@@ -341,5 +324,5 @@ def main():
     #create_graph(PATH+RESULTS_FILE)
  
 if __name__ == "__main__":
-    #main()
-    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results100.csv")
+    main()
+    #create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
