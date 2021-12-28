@@ -240,7 +240,6 @@ def transform_data(data):
     return new_df
 
 
-
 # Data is a dictionary with set sizes as keys and a 2d array of compression type as rows
 #   and the amount of space as the columns
 def write_csv_old(path, resultsfile, data, set_sizel, num_trials):
@@ -272,6 +271,7 @@ def create_graph(file_path):
             df_set["space"] = df_set["space"]/s
             df_clean = df_clean.append(df_set, ignore_index=True)
         df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(bins=20,alpha=.7,color=m[1])
+    df_clean.to_csv("results_normalized_histogram.csv")
     
     handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
     labels= M
@@ -279,6 +279,12 @@ def create_graph(file_path):
 
     plt.show()
     return
+
+def create_trendline_csv():
+    pass
+
+def create_baravg_csv():
+    pass
 
 #======================================================================== 
 
@@ -295,6 +301,8 @@ def main():
     set_sizel = [100, 1000, 10000]
 
     # holds data for all found sizes
+    # Is a dictionary with keys as the set sizes and values as a 2d array
+    #   of columns being the methods and rows being each trial
     S = {}
     
     for s in set_sizel:
