@@ -256,13 +256,15 @@ def write_csv_old(path, resultsfile, data, set_sizel, num_trials):
                 f.write("|")
             f.write("\n")
      
-def create_graph(file_path):
+def create_graph_hist(file_path, labels):
     df = pd.read_csv(file_path, index_col=0)
 
     # methods to compare
-    M = [0, 1, 2, 3, 4, 5]
+    M = [0,1,2,3,4,5]
     colors = ["blue", "coral", "green", "purple", "red", "yellow"]
     df_clean = pd.DataFrame()
+
+    fig, ax  = plt.subplots()
 
     for m in zip(M,colors):
         df0 = df[df["method_num"] == m[0]]
@@ -270,20 +272,58 @@ def create_graph(file_path):
             df_set = df0[df0["set_size"] == s]
             df_set["space"] = df_set["space"]/s
             df_clean = df_clean.append(df_set, ignore_index=True)
-        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(bins=20,alpha=.7,color=m[1])
+        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(ax=ax, bins=20,alpha=.7,color=m[1], density=False)
+        #df_clean[df_clean["method_num"] == m[0]]["space"].plot.kde(ax=ax, color=m[1])
     df_clean.to_csv("results_normalized_histogram.csv")
     
     handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
-    labels= M
-    plt.legend(handles, labels)
+
+    # selects wich labels to be used
+    l = []
+    for m in M:
+        l.append(labels[m])
+
+    plt.legend(handles, l)
+    ax.set_ylabel("Count")
+    ax.set_xlabel("Bits Taken on Average per Number")
+    plt.ylim(0, 1700)
 
     plt.show()
     return
 
-def create_trendline_csv():
-    pass
+def create_graph_trendline(file_path, labels):
+    df = pd.read_csv(file_path,index_col=0)
 
-def create_baravg_csv():
+    # take average
+    # condense into 6 x 3 points (18)
+    # plot
+
+    # M stands for method. These are the methods that will be plotted.
+    #   Change to compare individual methods
+    M = [0,1,2,3,4,5]
+
+    df_clean = pd.DataFrame()
+    for i in df["set_size"].unique():
+        for m in M:
+            df0 = df.loc[df["set_size"] == i]
+            df0 = df0.loc[df0["method_num"] == m]
+            df0["space"] = df0["space"].mean()
+            df0 = df0.drop_duplicates()
+            df_clean =df_clean.append(df0)
+    
+    fig, ax  = plt.subplots()
+
+    for m in M:
+        df_clean.loc[df_clean["method_num"] == m].plot(kind="line", x="set_size", y="space", ax=ax, label=labels[m])
+        print(df_clean.loc[df_clean["method_num"] == m].head())
+
+    ax.set_ylabel("Bits Taken")
+    ax.set_xlabel("Set Size")
+
+    plt.show()
+    
+
+def create_graph_baravg():
     pass
 
 #======================================================================== 
@@ -337,5 +377,9 @@ def main():
     #create_graph(PATH+RESULTS_FILE)
  
 if __name__ == "__main__":
+    file_path = "/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv"
+    labels = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
+    create_graph_hist(file_path, labels)
     #main()
-    create_graph("/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv")
+    #create_graph_trendline(file_path, labels)
+
