@@ -260,11 +260,12 @@ def create_graph_hist(file_path, labels):
     df = pd.read_csv(file_path, index_col=0)
 
     # methods to compare
-    M = [2,3,4,5]
+    M = [0,1,2,3,4,5]
     colors = ["blue", "coral", "green", "purple", "red", "yellow"]
     df_clean = pd.DataFrame()
 
-    fig, ax  = plt.subplots()
+    fig, ax  = plt.subplots(figsize=(15,5))
+    #fig, ax  = plt.subplots(figsize=(9,5))
 
     for m in zip(M,colors):
         df0 = df[df["method_num"] == m[0]]
@@ -272,8 +273,8 @@ def create_graph_hist(file_path, labels):
             df_set = df0[df0["set_size"] == s]
             df_set["space"] = df_set["space"]/s
             df_clean = df_clean.append(df_set, ignore_index=True)
-        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(ax=ax, bins=20,alpha=.7,color=m[1], density=True)
-        df_clean[df_clean["method_num"] == m[0]]["space"].plot.kde(ax=ax, color=m[1])
+        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(ax=ax, bins=20,alpha=.7,color=m[1], density=False)
+        #df_clean[df_clean["method_num"] == m[0]]["space"].plot.kde(ax=ax, color=m[1])
     df_clean.to_csv("results_normalized_histogram.csv")
     
     handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
@@ -283,11 +284,12 @@ def create_graph_hist(file_path, labels):
     for m in M:
         l.append(labels[m])
 
-    plt.legend(handles, l)
+    plt.legend(handles, l, loc="upper left")
     ax.set_ylabel("Count")
+    #ax.set_ylabel("Probability per Bit")
     ax.set_xlabel("Bits Taken on Average per Number")
-    #plt.ylim(0, 1700)
-    plt.title("Density Histogram of Space Taken for Each Method")
+    plt.ylim(0, 1700)
+    plt.title("Histogram of Space Taken for Each Method")
     plt.show()
     return
 
@@ -311,7 +313,7 @@ def create_graph_trendline(file_path, labels):
             df0 = df0.drop_duplicates()
             df_clean =df_clean.append(df0)
     
-    fig, ax  = plt.subplots()
+    fig, ax  = plt.subplots(figsize=(9,5))
 
     for m in M:
         df_clean.loc[df_clean["method_num"] == m].plot(kind="line", x="set_size", y="space", ax=ax, label=labels[m])
@@ -349,8 +351,8 @@ def create_graph_baravg(file_path, labels):
         l.append(labels[m])
     
     #df_clean = df_clean.assign(names=l)
-
-    ax = df_clean.plot.bar(x="method_num", y="space")    
+    fig, ax = plt.subplots(figsize=(9,5))
+    df_clean.plot.bar(x="method_num", y="space", ax=ax)    
     ax.set_xlabel("Method")
     ax.set_ylabel("Average Bits Used per Number")
     plt.title("Average Bits Used")
@@ -372,7 +374,9 @@ def create_graph_bar_meth2(file_path, labels):
     df = df.drop_duplicates()
     for s in df["set_size"].unique():
         df.loc[df["set_size"] == s, "space"] = df.loc[df["set_size"] == s]["space"].div(s)
-    ax = df.plot.bar(x="set_size", y="space", legend=False)
+    
+    fig, ax = plt.subplots(figsize=(9,6))
+    df.plot.bar(x="set_size", y="space", legend=False, ax=ax)
     
     ax.set_xlabel("Set Size")
     ax.set_ylabel("Average Bits Used per Number")
@@ -404,7 +408,7 @@ def graph_scatter_delim(file_path):
     df = df.drop("trial_num", axis=1)
     df = df.drop_duplicates()
 
-    fig, ax = plt.subplots(figsize=(20,2))
+    fig, ax = plt.subplots(figsize=(9,5))
     colors = ["red", "blue", "green"]
     labels = ["Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
     for m in zip(df["method_num"].unique(), colors, labels):
@@ -501,16 +505,17 @@ def main():
  
 if __name__ == "__main__":
     file_path = "/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv"
+    file_path = "compression_rates_results.csv"
     labels = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
-    #create_graph_hist(file_path, labels)
+    create_graph_hist("compression_rates_results.csv", labels)
     #main()
     #create_graph_trendline(file_path, labels)
     #create_graph_baravg(file_path, labels)
     #test_delim_size("delim_results.csv")
-    #create_graph_bar_meth2(file_path, labels)
+    create_graph_bar_meth2(file_path, labels)
 
 
     PATH = "/home/kieran/Documents/Bachelor_Thesis/"
     GENE_FILE = "hg38.ensGene.gtf"
     #mean_number_values(PATH+GENE_FILE)
-    graph_scatter_delim(PATH+"Implementation/compression_rates_results_delim.csv")
+    #graph_scatter_delim("compression_rates_results_delim.csv")
