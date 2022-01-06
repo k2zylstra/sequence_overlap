@@ -13,6 +13,13 @@ from matplotlib.patches import Rectangle
 import os
 import datetime
 
+PATH = "/home/kieran/Documents/Bachelor_Thesis/"
+OUT_PATH = "/home/kieran/Documents/Bachelor_Thesis"
+GENE_FILE = "hg38.ensGene.gtf"
+RESULTS_FILE = "compression_rates_results.csv"
+RESULTS_DELIM_FILE = "compression_rates_results_delim.csv"
+#LABELS = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
+
 # will contain repeats
 def create_rnd_rows(num_rows, file_len):
     rndlist = []
@@ -26,7 +33,6 @@ def create_rnd_rows(num_rows, file_len):
     
     rndlist.sort()
     return rndlist
-
 
 def get_data_ucsc_gtf(num_rows, file_name):
     #create empty data frame with gtf format
@@ -256,176 +262,19 @@ def write_csv_old(path, resultsfile, data, set_sizel, num_trials):
                 f.write("|")
             f.write("\n")
      
-def create_graph_hist(file_path, labels):
-    df = pd.read_csv(file_path, index_col=0)
+#======================================================================== 
 
-    # methods to compare
-    M = [0,1,2,3,4,5]
-    colors = ["blue", "coral", "green", "purple", "red", "yellow"]
-    df_clean = pd.DataFrame()
-
-    fig, ax  = plt.subplots(figsize=(15,5))
-    #fig, ax  = plt.subplots(figsize=(9,5))
-
-    for m in zip(M,colors):
-        df0 = df[df["method_num"] == m[0]]
-        for s in df["set_size"].unique():
-            df_set = df0[df0["set_size"] == s]
-            df_set["space"] = df_set["space"]/s
-            df_clean = df_clean.append(df_set, ignore_index=True)
-        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(ax=ax, bins=20,alpha=.7,color=m[1], density=False)
-        #df_clean[df_clean["method_num"] == m[0]]["space"].plot.kde(ax=ax, color=m[1])
-    df_clean.to_csv("results_normalized_histogram.csv")
-    
-    handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
-
-    # selects wich labels to be used
-    l = []
-    for m in M:
-        l.append(labels[m])
-
-    plt.legend(handles, l, loc="upper left")
-    ax.set_ylabel("Count")
-    #ax.set_ylabel("Probability per Bit")
-    ax.set_xlabel("Bits Taken on Average per Number")
-    plt.ylim(0, 1700)
-    plt.title("Histogram of Space Taken for Each Method")
-    plt.show()
-    return
-
-def create_graph_trendline(file_path, labels):
-    df = pd.read_csv(file_path,index_col=0)
-
-    # take average
-    # condense into 6 x 3 points (18)
-    # plot
-
-    # M stands for method. These are the methods that will be plotted.
-    #   Change to compare individual methods
-    M = [0,1,2,3,4,5]
-
-    df_clean = pd.DataFrame()
-    for i in df["set_size"].unique():
-        for m in M:
-            df0 = df.loc[df["set_size"] == i]
-            df0 = df0.loc[df0["method_num"] == m]
-            df0["space"] = df0["space"].mean()
-            df0 = df0.drop_duplicates()
-            df_clean =df_clean.append(df0)
-    
-    fig, ax  = plt.subplots(figsize=(9,5))
-
-    for m in M:
-        df_clean.loc[df_clean["method_num"] == m].plot(kind="line", x="set_size", y="space", ax=ax, label=labels[m])
-        print(df_clean.loc[df_clean["method_num"] == m].head())
-
-    ax.set_ylabel("Bits Taken")
-    ax.set_xlabel("Set Size")
-    plt.title("Trendline of Increasing Set Size")
-
-    plt.show()
-    
-
-def create_graph_baravg(file_path, labels):
-    df = pd.read_csv(file_path,index_col=0)
-    M = [0,1,2,3,4,5]
-    columns = ["method_num", "avg"]
-    
-    df_norm = pd.DataFrame()
-    df_clean = pd.DataFrame()
-    l = []
-    for m in M:
-        df0 = df.loc[df["method_num"] == m]
-        for s in df["set_size"].unique():
-            df_set = df0.loc[df0["set_size"] == s]
-            df_set["space"] = df_set["space"]/s
-            df_set.drop(["trial_num", "set_size"], axis=1, inplace=True)
-            df_set = df_set.drop_duplicates()
-            df_norm = df_norm.append(df_set, ignore_index=True)
-    for m in M:
-        df0 = df_norm.loc[df_norm["method_num"] == m]
-        df0["space"] = df0["space"].mean()
-        df0 = df0.drop_duplicates()
-        df_clean = df_clean.append(df0, ignore_index=True)
-
-        l.append(labels[m])
-    
-    #df_clean = df_clean.assign(names=l)
-    fig, ax = plt.subplots(figsize=(9,5))
-    df_clean.plot.bar(x="method_num", y="space", ax=ax)    
-    ax.set_xlabel("Method")
-    ax.set_ylabel("Average Bits Used per Number")
-    plt.title("Average Bits Used")
-    x = df_clean["method_num"].tolist()
-    y = df_clean["space"].tolist()
-    for i in range(len(y)):
-        y[i] = math.trunc(y[i] * 1000) / 1000
-    for i in range(len(x)):
-        plt.text(i, y[i], y[i], ha="center")
-    plt.show()
-
-def create_graph_bar_meth2(file_path, labels):
-    df = pd.read_csv(file_path, index_col=0)
-    df = df.loc[df["method_num"] == 2]
-    df = df.drop("method_num",axis=1)
-    df = df.drop("trial_num",axis=1)
-    for s in df["set_size"].unique():
-        df.loc[df["set_size"] == s, "space"] = df.loc[df["set_size"] == s]["space"].mean()
-    df = df.drop_duplicates()
-    for s in df["set_size"].unique():
-        df.loc[df["set_size"] == s, "space"] = df.loc[df["set_size"] == s]["space"].div(s)
-    
-    fig, ax = plt.subplots(figsize=(9,6))
-    df.plot.bar(x="set_size", y="space", legend=False, ax=ax)
-    
-    ax.set_xlabel("Set Size")
-    ax.set_ylabel("Average Bits Used per Number")
-    plt.title("Average Bits Used in Method 2 Depending on Set Size")
-
-    x = df["set_size"].tolist()
-    y = df["space"].tolist()
-    for i in range(len(y)):
-        y[i] = math.trunc(y[i] * 1000) / 1000
-    for i in range(len(x)):
-        plt.text(i, y[i], y[i], ha="center")
-
-    plt.show()
-
-def mean_number_values(file_path):
-    A = get_data_ucsc_gtf(100000, file_path)
+def test_mean_values(file_path, gene_file):
+    full_path = file_path + gene_file
+    A = get_data_ucsc_gtf(100000, full_path)
     total = 0
     for a in A:
         total += a[1] - a[0]
     avge = total / len(A)
     print("The mean length of genomic feature is:",avge)
-        
-def graph_scatter_delim(file_path):
-    df = pd.read_csv(file_path, index_col=0)
+ 
+def test_delim_size(path, gene_file, results_file, num_trials, out_path):
 
-    for d in df["delim_size"].unique():
-        for m in df["method_num"].unique():
-            df.loc[df["method_num"].eq(m) & df["delim_size"].eq(d), "space"] = df.loc[df["method_num"].eq(m) & df["delim_size"].eq(d), "space"].mean()
-    df = df.drop("trial_num", axis=1)
-    df = df.drop_duplicates()
-
-    fig, ax = plt.subplots(figsize=(9,5))
-    colors = ["red", "blue", "green"]
-    labels = ["Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
-    for m in zip(df["method_num"].unique(), colors, labels):
-        df.loc[df["method_num"] == m[0]].plot(kind="line", x="delim_size", y="space", c=m[1], ax=ax, label=m[2])
-        print(df.loc[df["method_num"] == m[0]])
-    ax.set_ylabel("Space Used (bits)")
-    ax.set_xlabel("Deiliminator Size (bits)")
-    plt.title("Space Used by Deliminator Size")
-    
-    plt.show()
-#======================================================================== 
-
-def test_delim_size(results_file):
-    PATH = "/home/kieran/Documents/Bachelor_Thesis/"
-    GENE_FILE = "hg38.ensGene.gtf"
-    RESULTS_FILE = "compression_rates_results_delim.csv"
-    num_trials = 300 
     set_size = 500
     delim_range = range(0,16)
 
@@ -436,7 +285,7 @@ def test_delim_size(results_file):
     df = pd.DataFrame(columns=columns)
     for d in delim_range:
         for i in range(num_trials):
-            A = get_data_ucsc_gtf(set_size, PATH+GENE_FILE)
+            A = get_data_ucsc_gtf(set_size, path+gene_file)
             trial = []
             trial.append(test_comp_delim(A, d))
             trial.append(test_comp_delim2(A, d))
@@ -448,18 +297,12 @@ def test_delim_size(results_file):
         print("Finished trials for delimiter size:", str(d), ": at", str(now))
     
     print(df.head())
-    df.to_csv(RESULTS_FILE)
+    df.to_csv(results_file)
     
     now = datetime.datetime.now()
     print(now)
 
-
-
-def main():
-    PATH = "/home/kieran/Documents/Bachelor_Thesis/"
-    GENE_FILE = "hg38.ensGene.gtf"
-    RESULTS_FILE = "compression_rates_results.csv"
-    num_trials = 1000 
+def test_main_data(path, gene_file, results_file, num_trials, out_path):
 
     now = datetime.datetime.now()
     print(str(now))
@@ -475,7 +318,7 @@ def main():
     for s in set_sizel:
         size = []
         for i in range(num_trials):
-            A = get_data_ucsc_gtf(s, PATH+GENE_FILE)
+            A = get_data_ucsc_gtf(s, path+gene_file)
 
             trial = []
             trial.append(test_comp_normal(A))
@@ -497,25 +340,26 @@ def main():
 
     df = transform_data(S)
     print(df.head())
-    df.to_csv(PATH+RESULTS_FILE)
+    df.to_csv(results_file)
     #write_csv_old(PATH, RESULTS_FILE, S, set_sizel, num_trials)
     now = datetime.datetime.now()
     print(str(now))
-    #create_graph(PATH+RESULTS_FILE)
+
+def main():
+    global PATH 
+    global GENE_FILE
+    global RESULTS_FILE
+    global RESULTS_DELIM_FILE
+    global LABELS
+    global OUT_PATH
+
+    num_meth_trials = 3
+    num_delim_trials = 3
+
+    test_main_data(PATH, GENE_FILE, RESULTS_FILE, num_meth_trials, out_path)
+    test_delim_size(PATH, GENE_FILE, RESULTS_DELIM_FILE, num_delim_trials, out_path)
+    test_mean_values(PATH, GENE_FILE)
+   
  
 if __name__ == "__main__":
-    file_path = "/home/kieran/Documents/Bachelor_Thesis/Implementation/compression_rates_results.csv"
-    file_path = "compression_rates_results.csv"
-    labels = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
-    create_graph_hist("compression_rates_results.csv", labels)
-    #main()
-    #create_graph_trendline(file_path, labels)
-    #create_graph_baravg(file_path, labels)
-    #test_delim_size("delim_results.csv")
-    create_graph_bar_meth2(file_path, labels)
-
-
-    PATH = "/home/kieran/Documents/Bachelor_Thesis/"
-    GENE_FILE = "hg38.ensGene.gtf"
-    #mean_number_values(PATH+GENE_FILE)
-    #graph_scatter_delim("compression_rates_results_delim.csv")
+    main()
