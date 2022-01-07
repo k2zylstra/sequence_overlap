@@ -31,11 +31,12 @@ def get_prob(base_int_size, delim_size):
     for i in range(S):
         if s in x[i]:
             c += 1
-    
+    print(c)
     return c/S
 
 def main():
-    get_all_probs(22)
+    #get_all_probs(22)
+    print(get_prob(9,2))
 
 if __name__ == "__main__":
     main()
