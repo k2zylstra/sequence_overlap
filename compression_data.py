@@ -324,9 +324,9 @@ def test_main_data(path, gene_file, results_file, num_trials, out_path):
             trial.append(test_comp_normal(A))
             trial.append(test_comp_first(A))
             trial.append(test_comp_second(A))
-            trial.append(test_comp_delim(A, 9))
-            trial.append(test_comp_delim2(A, 9))
-            trial.append(test_comp_delim2_smlhdr(A, 9))
+            trial.append(test_comp_delim(A, 7))
+            trial.append(test_comp_delim2(A, 7))
+            trial.append(test_comp_delim2_smlhdr(A, 5))
             
             #now = datetime.datetime.now()
             #print("completed trial:", str(i),"| timestamp:", str(now))
