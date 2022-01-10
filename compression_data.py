@@ -34,6 +34,8 @@ def create_rnd_rows(num_rows, file_len):
     rndlist.sort()
     return rndlist
 
+# gets the data from the gtf file gtf file
+#   and puts it into a numpy array of start and stop values
 def get_data_ucsc_gtf(num_rows, file_name):
     #create empty data frame with gtf format
     df = pd.DataFrame(columns=['sequence', 'source', 'feature', 'start', 'end'])
@@ -61,6 +63,8 @@ def get_data_ucsc_gtf(num_rows, file_name):
     arr = df.to_numpy()
     return arr
 
+# This isn't really used but it gets the data from the
+#   encode api.
 def get_data_encode_api():
     headers = {'accept': 'application/json'}
 
@@ -211,6 +215,8 @@ def test_comp_delim2_smlhdr(A, delim_size):
     size += 2 * prob_nat_delim * len(A) * largest_bit_size
     return size
 
+# This creates a new csv and is meant to be used with the 
+#   create_csv_old method. 
 def create_new_csv(path, num_trials):
     if os.path.exists(path):
         with open("compression_rates_results.csv", "w") as f:
@@ -264,6 +270,8 @@ def write_csv_old(path, resultsfile, data, set_sizel, num_trials):
      
 #======================================================================== 
 
+# this method grabs data using the get_data_ucsc_gtf method and then
+#   calculates the average length of a genomic feature and returns this
 def test_mean_values(file_path, gene_file):
     full_path = file_path + gene_file
     A = get_data_ucsc_gtf(100000, full_path)
@@ -272,7 +280,11 @@ def test_mean_values(file_path, gene_file):
         total += a[1] - a[0]
     avge = total / len(A)
     print("The mean length of genomic feature is:",avge)
+    
+    return avg3
  
+# This grabs data for methods 3, 4, and 5 to look at delimiter
+#   size results. I throws space data into a csv file
 def test_delim_size(path, gene_file, results_file, num_trials, out_path):
 
     set_size = 500
@@ -302,6 +314,9 @@ def test_delim_size(path, gene_file, results_file, num_trials, out_path):
     now = datetime.datetime.now()
     print(now)
 
+# This is the main data collection method as it grabs all the data relating to
+#   all of the methods. The data is then thrown into a csv. set_sizel holds
+#   the different set sizes that are to be checked
 def test_main_data(path, gene_file, results_file, num_trials, out_path):
 
     now = datetime.datetime.now()

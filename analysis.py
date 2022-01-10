@@ -16,6 +16,10 @@ RESULTS_DELIM_FILE = "compression_rates_results_delim.csv"
 LABELS = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", \
     "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
 
+# creates the histogram graph of all methods listed in M.
+# This method will also show the pdf on the histogram if some of the
+#   lines are uncommented. Keep in mind that if the pdf is used methods
+#   0 and 1 cannot be included in M because they only have one value
 def create_graph_hist(file_path,file_name, labels):
     full_path = file_path+file_name
     df = pd.read_csv(full_path, index_col=0)
@@ -54,6 +58,8 @@ def create_graph_hist(file_path,file_name, labels):
     plt.show()
     return
 
+# this creates the trendline graph of all methods listed in M
+#   as the set size increases
 def create_graph_trendline(file_path, file_name, labels):
     full_path = file_path+file_name
     df = pd.read_csv(full_path,index_col=0)
@@ -88,6 +94,8 @@ def create_graph_trendline(file_path, file_name, labels):
     plt.show()
     
 
+# This creates the bar graph that lists the average space
+#   taken by all methods listed in M
 def create_graph_baravg(file_path, file_name, labels):
     full_path = file_path+file_name
     df = pd.read_csv(full_path,index_col=0)
@@ -127,6 +135,8 @@ def create_graph_baravg(file_path, file_name, labels):
         plt.text(i, y[i], y[i], ha="center")
     plt.show()
 
+# this creates the bar graph for method 2 demonstrating how the 
+#   method scales with different set sizes
 def create_graph_bar_meth2(file_path, file_name, labels):
     full_path = file_path + file_name
     df = pd.read_csv(full_path, index_col=0)
@@ -155,6 +165,8 @@ def create_graph_bar_meth2(file_path, file_name, labels):
 
     plt.show()
        
+# creates the line graph for methods 3, 4, and 5 to showcase how they change
+#   based on dilimter size
 def create_graph_lin_delim(file_path, file_name):
     full_path = file_path + file_name
     df = pd.read_csv(full_path, index_col=0)
