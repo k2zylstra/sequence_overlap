@@ -17,9 +17,6 @@ LABELS = ["Control", "Static Reduction", "Static Reduction with Seperate Lists",
     "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
 
 # creates the histogram graph of all methods listed in M.
-# This method will also show the pdf on the histogram if some of the
-#   lines are uncommented. Keep in mind that if the pdf is used methods
-#   0 and 1 cannot be included in M because they only have one value
 def create_graph_hist(file_path,file_name, labels):
     full_path = file_path+file_name
     df = pd.read_csv(full_path, index_col=0)
@@ -54,6 +51,42 @@ def create_graph_hist(file_path,file_name, labels):
     #ax.set_ylabel("Probability per Bit")
     ax.set_xlabel("Bits Taken on Average per Number")
     plt.ylim(0, 1700)
+    plt.title("Histogram of Space Taken for Each Method")
+    plt.show()
+    return
+
+# creates the pdf graph of all methods listed in M.
+def create_graph_hist_pdf(file_path,file_name, labels):
+    full_path = file_path+file_name
+    df = pd.read_csv(full_path, index_col=0)
+
+    # methods to compare
+    M = [2,3,4,5]
+    colors = ["blue", "coral", "green", "purple", "red", "yellow"]
+    df_clean = pd.DataFrame()
+
+    fig, ax  = plt.subplots(figsize=(15,5))
+
+    for m in zip(M,colors):
+        df0 = df[df["method_num"] == m[0]]
+        for s in df["set_size"].unique():
+            df_set = df0[df0["set_size"] == s]
+            df_set["space"] = df_set["space"]/s
+            df_clean = df_clean.append(df_set, ignore_index=True)
+        df_clean[df_clean["method_num"] == m[0]]["space"].plot.hist(ax=ax, bins=20,alpha=.7,color=m[1], density=True)
+        df_clean[df_clean["method_num"] == m[0]]["space"].plot.kde(ax=ax, color=m[1])
+    df_clean.to_csv("results_normalized_histogram.csv")
+    
+    handles = [Rectangle((0,0),1,1,color=c,ec="k") for c in colors]
+
+    # selects wich labels to be used
+    l = []
+    for m in M:
+        l.append(labels[m])
+
+    plt.legend(handles, l, loc="upper left")
+    ax.set_ylabel("Probability per Bit")
+    ax.set_xlabel("Bits Taken on Average per Number")
     plt.title("Histogram of Space Taken for Each Method")
     plt.show()
     return
@@ -191,6 +224,7 @@ def create_graph_lin_delim(file_path, file_name):
 
 def main():
     create_graph_hist(PATH, RESULTS_FILE, LABELS)
+    create_graph_hist_pdf(PATH, RESULTS_FILE, LABELS)
     create_graph_trendline(PATH, RESULTS_FILE, LABELS)
     create_graph_baravg(PATH, RESULTS_FILE, LABELS)
     create_graph_bar_meth2(PATH, RESULTS_FILE, LABELS)
