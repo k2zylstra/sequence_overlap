@@ -23,6 +23,10 @@ This file is used for getting the probability that a sub string of size "x" will
 
 This file was meant for the BITS_base.py and BITS_succinct1.py files. It generates random start and stop values that the BITS algorithm can work on.
 
+### old_data
+
+Holds the csv files when I was writing csv's in a different format.
+
 ## Running
 In order to generate that output from these files the two most important files are the compression_data.py and analysis.py files. The first generates the data and the second displays it. Before running either of these files make sure to **set all of the global variables**. Keep in mind that if RESULTS_FILE_DELIM and RESULTS_FILE are set to be the same, the delimiter will overwrite the RESULTS_FILE. Uncomment all lines in main if any are commented.
 
