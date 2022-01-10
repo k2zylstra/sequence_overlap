@@ -9,12 +9,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle
 
-PATH = "/home/kieran/Documents/Bachelor_Thesis/Implementation/"
-GENE_FILE = "hg38.ensGene.gtf"
-RESULTS_FILE = "compression_rates_results.csv"
-RESULTS_DELIM_FILE = "compression_rates_results_delim.csv"
+PATH = "/home/kieran/Documents/Bachelor_Thesis/Implementation/" # working directory path
+GENE_FILE = "hg38.ensGene.gtf" # gene data file
+RESULTS_FILE = "compression_rates_results.csv" # main data file
+RESULTS_DELIM_FILE = "compression_rates_results_delim.csv" # output delimiter file
 LABELS = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", \
-    "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
+    "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"] # method labels
 
 # creates the histogram graph of all methods listed in M.
 def create_graph_hist(file_path,file_name, labels):

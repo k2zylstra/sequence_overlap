@@ -13,11 +13,11 @@ from matplotlib.patches import Rectangle
 import os
 import datetime
 
-PATH = "/home/kieran/Documents/Bachelor_Thesis/"
-OUT_PATH = "/home/kieran/Documents/Bachelor_Thesis"
-GENE_FILE = "hg38.ensGene.gtf"
-RESULTS_FILE = "compression_rates_results.csv"
-RESULTS_DELIM_FILE = "compression_rates_results_delim.csv"
+PATH = "/home/kieran/Documents/Bachelor_Thesis/" # Path of working directory
+OUT_PATH = "/home/kieran/Documents/Bachelor_Thesis" # Path for outputting data into
+GENE_FILE = "hg38.ensGene.gtf" # gtf data file
+RESULTS_FILE = "compression_rates_results.csv" # main output file name
+RESULTS_DELIM_FILE = "compression_rates_results_delim.csv" # delimiter output file name
 #LABELS = ["Control", "Static Reduction", "Static Reduction with Seperate Lists", "Dynamic Reduction with Deliminator", "Augmented with Index", "Augmented with Small Header Table"]
 
 # will contain repeats
