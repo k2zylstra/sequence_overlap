@@ -19,3 +19,7 @@ The beginning of trying to use the different methods to change the array storing
 ### check_prob_bistring.py
 
 This file is used for getting the probability that a sub string of size "x" will occur in a string. It does this empirically, by generating all possible strings of a set size and then counting which strings have the substring. This can take too long if the string sizes are too large, though.
+
+### gen_rnd_data.py
+
+This file was meant for the BITS_base.py and BITS_succinct1.py files. It generates random start and stop values that the BITS algorithm can work on.
