@@ -1,5 +1,4 @@
 ## Files
-
 ### compression_data.py
 
 This file collects data into pandas data frames and throws it into csv files. It has a method for collecting data from the ucsc gtf files and from the encode api. From the gtf data file it generates csv recording the effect of set size, delimiter size, and method on the space taken by the array of start and end values for each genomic tuple.
@@ -23,3 +22,8 @@ This file is used for getting the probability that a sub string of size "x" will
 ### gen_rnd_data.py
 
 This file was meant for the BITS_base.py and BITS_succinct1.py files. It generates random start and stop values that the BITS algorithm can work on.
+
+## Running
+In order to generate that output from these files the two most important files are the compression_data.py and analysis.py files. The first generates the data and the second displays it. Before running either of these files make sure to **set all of the global variables**. Keep in mind that if RESULTS_FILE_DELIM and RESULTS_FILE are set to be the same, the delimiter will overwrite the RESULTS_FILE. Uncomment all lines in main if any are commented.
+
+For the analysis.py file again make sure to set all global variables correctly. Then run the main method. This will generate all the graphs. Make sure there is the delimiter file and compression rates csv files before running this as without them there is no data to generate the graphs on.
